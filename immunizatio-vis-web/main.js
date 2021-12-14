@@ -1,13 +1,87 @@
 import './style.css';
 import * as d3 from "d3";
+//import {Circle} from './circle';
+import { create } from 'd3';
+//import * as p5 from "./p5";
 
 let GLOBAL = 100;
+let graph_Width = 660;
+let graph_height = 200;
+let sketchWidth = 660;
+let sketchHeight = 400;
+let innerRadius = 50;
+let outerRadius = 70;
+
+let allCircles = [];
+let color_healthy_inner, color_healthy_outer, color_ill_inner, color_ill_outer;
+
+class Circle{
+  constructor(canvas_widght, canvas_height, innerRadius, outerRadius, status=1, speed=4){
+      this.innerRadius = innerRadius;
+      this.outerRadius = outerRadius;
+
+      //Status: 1=Healty; 2=Infected
+      this.status = status;
+
+      this.minWidth = 0 + innerRadius;
+      this.maxWidth = canvas_widght - innerRadius;
+      this.minHeight = 0 + innerRadius;
+      this.maxHeight = canvas_height - innerRadius;
+      let x = Math.random() * (this.maxWidth - this.minWidth) + this.minWidth;
+      let y = Math.random() * (this.maxHeight - this.minHeight) + this.minHeight;
+      let position = p5.Vector.random2D();
+      position.x = x;
+      position.y = y;
+      this.position = position;
+
+      this.velocity = p5.Vector.random2D().setMag(speed);
+  }
+
+  show(){
+      console.log("Draw at:" + this.position.x + " " + this.position.y);
+      fill(color_healthy_outer);
+      noStroke();
+      ellipse(this.position.x, this.position.y, this.outerRadius*2, this.outerRadius*2);
+      fill(color_healthy_inner);
+      noStroke();
+      ellipse(this.position.x, this.position.y, this.innerRadius*2, this.innerRadius*2);
+  }
+
+  update(){
+    this.position.add(this.velocity);
+    //check for edges
+    //right edge
+    if(this.position.x >= this.maxWidth){
+      if(this.velocity.x > 0){
+        this.velocity.x = -1 * this.velocity.x;
+      }
+    }
+    //left edge
+    if(this.position.x <= this.minWidth){
+      if(this.velocity.x < 0){
+        this.velocity.x = -1 * this.velocity.x;
+      }
+    }
+    //right edge
+    if(this.position.y >= this.maxHeight){
+      if(this.velocity.y > 0){
+        this.velocity.y = -1 * this.velocity.y;
+      }
+    }
+    //left edge
+    if(this.position.y <= this.minHeight){
+      if(this.velocity.y < 0){
+        this.velocity.y = -1 * this.velocity.y;
+      }
+    }
+  }
+}
 
 function drawGraph(divID){
   // set the dimensions and margins of the graph
   const margin = {top: 60, right: 230, bottom: 50, left: 50},
-  width = 660 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+  width = graph_Width - margin.left - margin.right,
+  height = graph_height - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   const svg = d3.select(divID)
@@ -34,11 +108,11 @@ function drawGraph(divID){
   // GENERAL //
   //////////
 
-  console.log(data);
+  //console.log(data);
 
   // List of groups = header of the csv files
   const keys = data.columns.slice(1);
-  console.log(keys);
+  //console.log(keys);
 
   // color palette
   const color = d3.scaleOrdinal()
@@ -213,8 +287,8 @@ function drawGraph(divID){
 function drawGraphFromData(divID, data){
   // set the dimensions and margins of the graph
   const margin = {top: 60, right: 230, bottom: 50, left: 50},
-  width = 660 - margin.left - margin.right,
-  height = 400 - margin.top - margin.bottom;
+  width = graph_Width - margin.left - margin.right,
+  height = graph_height - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
   const svg = d3.select(divID)
@@ -229,7 +303,7 @@ function drawGraphFromData(divID, data){
   // GENERAL //
   //////////
 
-  console.log(data);
+  //console.log(data);
 
   // List of groups = header of the csv files
   const keys = ['Total_Cases', 'Total_Deaths'];
@@ -417,17 +491,37 @@ let testArray = [
   {date: new Date("2021-02-01"), Total_Cases: parseInt('12'), Total_Deaths: parseInt('4')}
 ];
 
+function setUpCircles(){
+  
+  allCircles.push(new Circle(sketchWidth, sketchHeight, innerRadius, outerRadius));
+}
+
+let v1; 
+
 window.setup = function (){
-  console.log("Setup + Global:" + GLOBAL);
-  let canvas = createCanvas(100, 100);
+
+  color_healthy_inner = color(92, 159, 248);
+  color_healthy_outer = color(189, 216, 252);
+  color_ill_inner = color(245, 47, 62);
+  color_ill_outer = color(249, 145, 152);
+
+  v1 = createVector(1,4);
+  let canvas = createCanvas(660, 400);
   canvas.parent('simulation-canvas');
-  console.log(canvas);
   background(255, 0, 200);
 }
 
 window.draw = function(){
+  background(240, 240, 240);
+  //draw the one circle
+  allCircles[0].show();
 
+  // allCircles.map((circle) =>{
+  //   circle.update();
+  //   circle.show();
+  // })
 }
 
 drawGraph("#chart1");
 drawGraphFromData("#chart2", testArray);
+setUpCircles();
