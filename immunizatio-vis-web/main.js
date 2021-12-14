@@ -1,6 +1,8 @@
 import './style.css';
 import * as d3 from "d3";
 
+let GLOBAL = 100;
+
 function drawGraph(divID){
   // set the dimensions and margins of the graph
   const margin = {top: 60, right: 230, bottom: 50, left: 50},
@@ -415,18 +417,17 @@ let testArray = [
   {date: new Date("2021-02-01"), Total_Cases: parseInt('12'), Total_Deaths: parseInt('4')}
 ];
 
-class DataPoint{
-  constructor(date, cases, deaths){
-    this.date = date;
-    this.cases = cases;
-    this.deaths = deaths;
-  }
+window.setup = function (){
+  console.log("Setup + Global:" + GLOBAL);
+  let canvas = createCanvas(100, 100);
+  canvas.parent('simulation-canvas');
+  console.log(canvas);
+  background(255, 0, 200);
 }
 
-let thing = new DataPoint(new Date("2020-03-01"), 1, 2);
+window.draw = function(){
 
-let test2 = [];
-test2.push(thing);
+}
 
 drawGraph("#chart1");
 drawGraphFromData("#chart2", testArray);
