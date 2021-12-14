@@ -20,10 +20,13 @@ let minWidth = () => 0 + innerRadius;
 let maxWidth = () => sketchWidth - innerRadius;
 let minHeight = () => 0 + innerRadius;
 let maxHeight = () => sketchHeight - innerRadius;
-let deadlines = 5;
+let deadValueInput = 5;
 let currentVacValue = 1;
 
-let daysToSimulate = 365*1000;
+let simulationCounter = 0;
+let daysToSimulate = 365*1;
+let daysAlreadySimulated = 0;
+let simulationData = [];
 
 let allCircles = [];
 let color_healthy_inner, color_healthy_outer, color_ill_inner, color_ill_outer;
@@ -332,6 +335,7 @@ function drawGraphFromData(divID, data){
   height = graph_height - margin.top - margin.bottom;
 
   // append the svg object to the body of the page
+  d3.select(divID).html(null);
   const svg = d3.select(divID)
   .append("svg")
   .attr("width", width + margin.left + margin.right)
@@ -517,7 +521,7 @@ function drawGraphFromData(divID, data){
       .on("mouseleave", noHighlight)
 }
 
-let testArray = [
+let testArray_old = [
   {date: new Date("2020-03-01"), Total_Cases: parseInt('1'), Total_Deaths: parseInt('1')},
   {date: new Date("2020-04-01"), Total_Cases: parseInt('2'), Total_Deaths: parseInt('2')},
   {date: new Date("2020-05-01"), Total_Cases: parseInt('3'), Total_Deaths: parseInt('2')},
@@ -530,6 +534,21 @@ let testArray = [
   {date: new Date("2020-12-01"), Total_Cases: parseInt('10'), Total_Deaths: parseInt('4')},
   {date: new Date("2021-01-01"), Total_Cases: parseInt('11'), Total_Deaths: parseInt('4')},
   {date: new Date("2021-02-01"), Total_Cases: parseInt('12'), Total_Deaths: parseInt('4')}
+];
+
+let testArray = [
+  {date: 1, Total_Cases: parseInt('1'), Total_Deaths: parseInt('1')},
+  {date: 2, Total_Cases: parseInt('2'), Total_Deaths: parseInt('2')},
+  {date: 3, Total_Cases: parseInt('3'), Total_Deaths: parseInt('2')},
+  {date: 4, Total_Cases: parseInt('4'), Total_Deaths: parseInt('2')},
+  {date: 5, Total_Cases: parseInt('5'), Total_Deaths: parseInt('4')},
+  {date: 6, Total_Cases: parseInt('6'), Total_Deaths: parseInt('4')},
+  {date: 7, Total_Cases: parseInt('7'), Total_Deaths: parseInt('4')},
+  {date: 8, Total_Cases: parseInt('8'), Total_Deaths: parseInt('4')},
+  {date: 9, Total_Cases: parseInt('9'), Total_Deaths: parseInt('4')},
+  {date: 10, Total_Cases: parseInt('10'), Total_Deaths: parseInt('4')},
+  {date: 11, Total_Cases: parseInt('11'), Total_Deaths: parseInt('4')},
+  {date: 12, Total_Cases: parseInt('12'), Total_Deaths: parseInt('4')}
 ];
 
 function setUpCircles(){
@@ -561,6 +580,12 @@ window.setup = function (){
 window.draw = function(){
   background(240, 240, 240);
 
+  //if play limit reached
+  if(animationPlaying && daysAlreadySimulated >= daysToSimulate){
+    animationPlaying = false;
+    console.log("Animation stopped - end reached.");
+  }
+
   //stats
   let number_ill = 0;
 
@@ -574,6 +599,19 @@ window.draw = function(){
     }
     circle.show();
   })
+
+  if(animationPlaying){
+    //calc stats
+    let number_death = number_ill * (deadValueInput / 100);
+    number_ill = number_ill - number_death;
+
+    //save stats to animation data
+    daysAlreadySimulated = daysAlreadySimulated + 1;
+
+    simulationData.push({date: daysAlreadySimulated, Total_Cases: number_ill, Total_Deaths: number_death});
+    //visualize data
+    drawGraphFromData("#chart" + simulationCounter, simulationData);
+  }
 }
 
 //connect JS to UI
@@ -597,7 +635,7 @@ document.getElementById("spread-input").oninput = () =>{
 
 document.getElementById("dead-input").oninput = () =>{
   let value = parseInt(document.getElementById("dead-input").value);
-  deadlines = value;
+  deadValueInput = value;
 }
 
 function syncVac(){
@@ -624,7 +662,16 @@ document.getElementById("vac-input").oninput = () =>{
   syncVac();
 }
 
+function addSimulationHtml(){
+  d3.select("#chart-list").append('div')
+    .attr('id',"chart" + simulationCounter);
+}
+
 function startSimulation(){
+  simulationData = [];
+  simulationCounter = simulationCounter + 1;
+  addSimulationHtml();
+  daysAlreadySimulated = 0;
   animationPlaying = true;
   //diable all the input
   //document.getElementById("play-btn").disabled = true; //This can be reset
@@ -638,9 +685,12 @@ function resetSimulation(){
   document.getElementById("spread-input").disabled = false;
   document.getElementById("dead-input").disabled = false;
   document.getElementById("vac-input").disabled = false;
+  simulationData = [];
+  daysAlreadySimulated = 0;
 }
 
-drawGraph("#chart1");
-drawGraphFromData("#chart2", testArray);
+drawGraph("#chartReal");
+drawGraphFromData("#chart1", testArray);
+drawGraphFromData("#chart1", testArray);
 setUpCircles();
 syncVac();
