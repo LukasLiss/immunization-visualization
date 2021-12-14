@@ -4,31 +4,47 @@ import * as d3 from "d3";
 import { create } from 'd3';
 //import * as p5 from "./p5";
 
-let GLOBAL = 100;
+let animationPlaying = false;
+let resetable = false;
+
 let graph_Width = 660;
 let graph_height = 200;
 let sketchWidth = 660;
 let sketchHeight = 400;
-let innerRadius = 50;
-let outerRadius = 70;
+
+//global values for circles
+let innerRadius = 4;
+let outerRadius = 8;
+let speed = 1;
+let minWidth = () => 0 + innerRadius;
+let maxWidth = () => sketchWidth - innerRadius;
+let minHeight = () => 0 + innerRadius;
+let maxHeight = () => sketchHeight - innerRadius;
+let deadlines = 5;
+let currentVacValue = 1;
+
+let daysToSimulate = 365*1000;
 
 let allCircles = [];
 let color_healthy_inner, color_healthy_outer, color_ill_inner, color_ill_outer;
+let color_vac_inner, color_vac_outer;
 
 class Circle{
-  constructor(canvas_widght, canvas_height, innerRadius, outerRadius, status=1, speed=4){
-      this.innerRadius = innerRadius;
-      this.outerRadius = outerRadius;
+  constructor(canvas_widght, canvas_height, innerRadius, outerRadius, rnumber, status=1, speed=4){
+      // this.innerRadius = innerRadius;
+      // this.outerRadius = outerRadius;
 
-      //Status: 1=Healty; 2=Infected
+      //Status: 1=Healty; 2=Infected; 3=Vacinated
       this.status = status;
+      this.rnumber = rnumber;
+      this.numOfInfected = 0;
 
-      this.minWidth = 0 + innerRadius;
-      this.maxWidth = canvas_widght - innerRadius;
-      this.minHeight = 0 + innerRadius;
-      this.maxHeight = canvas_height - innerRadius;
-      let x = Math.random() * (this.maxWidth - this.minWidth) + this.minWidth;
-      let y = Math.random() * (this.maxHeight - this.minHeight) + this.minHeight;
+      // this.minWidth = 0 + innerRadius;
+      // this.maxWidth = canvas_widght - innerRadius;
+      // this.minHeight = 0 + innerRadius;
+      // this.maxHeight = canvas_height - innerRadius;
+      let x = Math.random() * (maxWidth() - minWidth()) + minWidth();
+      let y = Math.random() * (maxHeight() - minHeight()) + minHeight();
       let position = p5.Vector.random2D();
       position.x = x;
       position.y = y;
@@ -38,43 +54,68 @@ class Circle{
   }
 
   show(){
-      console.log("Draw at:" + this.position.x + " " + this.position.y);
-      fill(color_healthy_outer);
+      //console.log("Draw at:" + this.position.x + " " + this.position.y);
+      if(this.status == 1) fill(color_healthy_outer);
+      if(this.status == 2) fill(color_ill_outer);
+      if(this.status == 3) fill(color_vac_outer);
       noStroke();
-      ellipse(this.position.x, this.position.y, this.outerRadius*2, this.outerRadius*2);
-      fill(color_healthy_inner);
+      ellipse(this.position.x, this.position.y, outerRadius*2, outerRadius*2);
+      if(this.status == 1) fill(color_healthy_inner);
+      if(this.status == 2) fill(color_ill_inner);
+      if(this.status == 3) fill(color_vac_inner);
       noStroke();
-      ellipse(this.position.x, this.position.y, this.innerRadius*2, this.innerRadius*2);
+      ellipse(this.position.x, this.position.y, innerRadius*2, innerRadius*2);
   }
 
   update(){
     this.position.add(this.velocity);
     //check for edges
     //right edge
-    if(this.position.x >= this.maxWidth){
+    if(this.position.x >= maxWidth()){
       if(this.velocity.x > 0){
         this.velocity.x = -1 * this.velocity.x;
       }
     }
     //left edge
-    if(this.position.x <= this.minWidth){
+    if(this.position.x <= minWidth()){
       if(this.velocity.x < 0){
         this.velocity.x = -1 * this.velocity.x;
       }
     }
     //right edge
-    if(this.position.y >= this.maxHeight){
+    if(this.position.y >= maxHeight()){
       if(this.velocity.y > 0){
         this.velocity.y = -1 * this.velocity.y;
       }
     }
     //left edge
-    if(this.position.y <= this.minHeight){
+    if(this.position.y <= minHeight()){
       if(this.velocity.y < 0){
         this.velocity.y = -1 * this.velocity.y;
       }
     }
   }
+
+  collisioncheck(){
+    //only infected dots make collision check
+    if(this.status == 2){
+      //console.log("I perform collsion check");
+      for(let i=0; i < allCircles.length; i++){
+        if(allCircles[i].status != 1) continue; //Only Healty unfacinated circles can get infected.
+        let distance = Math.sqrt(((allCircles[i].position.x - this.position.x)**2) + ((allCircles[i].position.y - this.position.y)**2));
+        if(distance <= 2 * outerRadius){
+          allCircles[i].status = 2;
+          this.numOfInfected = this.numOfInfected + 1;
+          //check whether you can infect more
+          if(this.numOfInfected >= this.rnumber){
+            break;
+          }
+
+        }
+      }
+    }
+  }
+
 }
 
 function drawGraph(divID){
@@ -492,8 +533,12 @@ let testArray = [
 ];
 
 function setUpCircles(){
-  
-  allCircles.push(new Circle(sketchWidth, sketchHeight, innerRadius, outerRadius));
+  allCircles = [];
+  for(let i=0; i < 100; i++){
+    allCircles.push(new Circle(sketchWidth, sketchHeight, innerRadius, outerRadius, 100, 1, speed));
+  }
+  allCircles[0].status = 2;
+  syncVac();
 }
 
 let v1; 
@@ -504,6 +549,8 @@ window.setup = function (){
   color_healthy_outer = color(189, 216, 252);
   color_ill_inner = color(245, 47, 62);
   color_ill_outer = color(249, 145, 152);
+  color_vac_inner = color(105, 164, 155);
+  color_vac_outer = color(185, 212, 208);
 
   v1 = createVector(1,4);
   let canvas = createCanvas(660, 400);
@@ -513,15 +560,87 @@ window.setup = function (){
 
 window.draw = function(){
   background(240, 240, 240);
-  //draw the one circle
-  allCircles[0].show();
 
-  // allCircles.map((circle) =>{
-  //   circle.update();
-  //   circle.show();
-  // })
+  //stats
+  let number_ill = 0;
+
+  allCircles.map((circle) =>{
+    if(animationPlaying){
+      circle.update();
+      circle.collisioncheck();
+      if(circle.status == 2){
+        number_ill = number_ill + 1;
+      }
+    }
+    circle.show();
+  })
+}
+
+//connect JS to UI
+document.getElementById("play-btn").onclick = () =>{
+  if(resetable){
+    document.getElementById("play-btn").value = "Start";
+    animationPlaying = false;
+    resetable = false;
+    resetSimulation();
+  }else{
+    document.getElementById("play-btn").value = "Reset";
+    resetable = true;
+    startSimulation();
+  }
+}
+
+document.getElementById("spread-input").oninput = () =>{
+  let spread = parseInt(document.getElementById("spread-input").value);
+  outerRadius = innerRadius + spread;
+}
+
+document.getElementById("dead-input").oninput = () =>{
+  let value = parseInt(document.getElementById("dead-input").value);
+  deadlines = value;
+}
+
+function syncVac(){
+  let vacVal = parseInt(document.getElementById("vac-input").value);
+  document.getElementById("vac-text").innerHTML = "Vaccination Rate: " + (vacVal * 10) + "%";
+  let numberOfVacCircle = parseInt(allCircles.length * (vacVal / 10));
+  let currentVacCircle = parseInt(allCircles.length * (currentVacValue / 10));
+
+  
+  for(let i=0; i < Math.max(currentVacCircle, numberOfVacCircle)  && i < allCircles.length; i++){
+    if(i < numberOfVacCircle){
+      allCircles[allCircles.length - 1 -i].status = 3; //Vaccinated
+    }else{
+      allCircles[allCircles.length - 1 - i].status = 1; //Healty
+    }
+  }
+  allCircles[0].status = 2; //First is allways ill
+  
+
+  currentVacValue = vacVal;
+}
+
+document.getElementById("vac-input").oninput = () =>{
+  syncVac();
+}
+
+function startSimulation(){
+  animationPlaying = true;
+  //diable all the input
+  //document.getElementById("play-btn").disabled = true; //This can be reset
+  document.getElementById("spread-input").disabled = true;
+  document.getElementById("dead-input").disabled = true;
+  document.getElementById("vac-input").disabled = true;
+}
+
+function resetSimulation(){
+  setUpCircles();
+  document.getElementById("spread-input").disabled = false;
+  document.getElementById("dead-input").disabled = false;
+  document.getElementById("vac-input").disabled = false;
 }
 
 drawGraph("#chart1");
 drawGraphFromData("#chart2", testArray);
 setUpCircles();
+syncVac();

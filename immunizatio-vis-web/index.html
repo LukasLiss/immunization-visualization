@@ -14,7 +14,21 @@
       </div>
       <div id="simulation-section">
         <div id="simulation-settings">
-
+          <div id="spread">
+            <p>Spread:</p>
+            <input type="range" min="0" max="10" value="5" id="spread-input">
+          </div>
+          <div id="deadliness">
+            <p>Deadliness:</p>
+            <input type="range" min="0" max="10" value="5" id="dead-input">
+          </div>
+          <div id="vac">
+            <p id="vac-text">Vaccination Rate: 10%</p>
+            <input type="range" min="0" max="10" value="1" id="vac-input">
+          </div>
+          <div id="play">
+            <input type="button" id="play-btn" value="Start">
+          </div>
         </div>
         <div id="simulation-canvas">
 
