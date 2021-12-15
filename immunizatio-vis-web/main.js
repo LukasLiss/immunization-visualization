@@ -13,6 +13,7 @@ let sketchWidth = 660;
 let sketchHeight = 400;
 
 //global values for circles
+let total_amount_of_circles = 100;
 let innerRadius = 4;
 let outerRadius = 8;
 let speed = 1;
@@ -20,9 +21,11 @@ let minWidth = () => 0 + innerRadius;
 let maxWidth = () => sketchWidth - innerRadius;
 let minHeight = () => 0 + innerRadius;
 let maxHeight = () => sketchHeight - innerRadius;
+let spreadValueInput = 5;
 let deadValueInput = 5;
 let currentVacValue = 1;
 
+let axisAbsolute = false;
 let simulationCounter = 0;
 let daysToSimulate = 365*1;
 let daysAlreadySimulated = 0;
@@ -370,12 +373,25 @@ function drawGraphFromData(divID, data){
   //////////
 
   // Add X axis
-  const x = d3.scaleTime()
-  .domain(d3.extent(data, function(d) { return d.date; }))
-  .range([ 0, width ]);
-  const xAxis = svg.append("g")
-  .attr("transform", `translate(0, ${height})`)
-  .call(d3.axisBottom(x).ticks(5))
+  let x;
+  if(axisAbsolute){
+    x = d3.scaleTime()
+    //.domain(d3.extent(data, function(d) { return d.date; }))
+    .domain([0,daysToSimulate])
+    .range([ 0, width ]);
+    const xAxis = svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(5))
+  }else{
+    x = d3.scaleTime()
+    .domain(d3.extent(data, function(d) { return d.date; }))
+    //.domain([0,daysToSimulate])
+    .range([ 0, width ]);
+    const xAxis = svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(5))
+  }
+  
 
   // Add X axis label:
   svg.append("text")
@@ -393,11 +409,23 @@ function drawGraphFromData(divID, data){
     .attr("text-anchor", "start")
 
   // Add Y axis
-  const y = d3.scaleLinear()
-  .domain([0, d3.max(data, d => +d.Total_Cases + d.Total_Deaths)])
-  .range([ height, 0 ]);
-  svg.append("g")
-  .call(d3.axisLeft(y).ticks(5))
+  let y;
+  if(axisAbsolute){
+    y = d3.scaleLinear()
+    //.domain([0, d3.max(data, d => +d.Total_Cases + d.Total_Deaths)])
+    .domain([0, total_amount_of_circles])
+    .range([ height, 0 ]);
+    svg.append("g")
+    .call(d3.axisLeft(y).ticks(5))
+  }else{
+    y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => +d.Total_Cases + d.Total_Deaths)])
+    //.domain([0, total_amount_of_circles])
+    .range([ height, 0 ]);
+    svg.append("g")
+    .call(d3.axisLeft(y).ticks(5))
+  }
+  
 
 
 
@@ -663,7 +691,17 @@ document.getElementById("vac-input").oninput = () =>{
 }
 
 function addSimulationHtml(){
-  d3.select("#chart-list").append('div')
+  d3.select("#chart-list").insert('div', ":first-child")
+    .attr('class','sim-container')
+    .attr('id',"container-chart" + simulationCounter);
+  d3.select("#container-chart" + simulationCounter).append('h4')
+    .attr('class', 'chart-header')
+    .html("Simulation Number: " + simulationCounter);
+  d3.select("#container-chart" + simulationCounter).append('p')
+    .attr('class', 'chart-text')
+    .html("Spread: " + spreadValueInput*10 + "%; Deadliness: " + deadValueInput + "%; Vaccination Rate: " + currentVacValue*10 + "%");
+
+  d3.select("#container-chart" + simulationCounter).append('div', ":first-child")
     .attr('id',"chart" + simulationCounter);
 }
 
