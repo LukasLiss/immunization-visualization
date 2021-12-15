@@ -141,7 +141,6 @@ function drawGraph(divID){
         `translate(${margin.left}, ${margin.top})`);
 
   // Parse the Data
-  //d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered_wide.csv").then( function(data) {
     d3.csv("./cleaned-world-data-in-million.csv", 
       d => {
         return {
@@ -165,7 +164,8 @@ function drawGraph(divID){
   // color palette
   const color = d3.scaleOrdinal()
   .domain(keys)
-  .range(d3.schemeSet2);
+  //.range(d3.schemeSet2);
+  .range(["#e01e1f", "#363e37"])
 
   //stack the data?
   const stackedData = d3.stack()
@@ -360,7 +360,7 @@ function drawGraphFromData(divID, data){
   // color palette
   const color = d3.scaleOrdinal()
   .domain(keys)
-  .range(d3.schemeSet2);
+  .range(["#e01e1f", "#363e37"]);
 
   //stack the data?
   const stackedData = d3.stack()
@@ -399,14 +399,14 @@ function drawGraphFromData(divID, data){
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height+40 )
-    .text("Time (year)");
+    .text("Time in days");
 
   // Add Y axis label:
   svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", 0)
     .attr("y", -20 )
-    .text("# of People in Million")
+    .text("% of People in Simulation")
     .attr("text-anchor", "start")
 
   // Add Y axis
@@ -593,12 +593,13 @@ let v1;
 
 window.setup = function (){
 
-  color_healthy_inner = color(92, 159, 248);
-  color_healthy_outer = color(189, 216, 252);
-  color_ill_inner = color(245, 47, 62);
-  color_ill_outer = color(249, 145, 152);
-  color_vac_inner = color(105, 164, 155);
-  color_vac_outer = color(185, 212, 208);
+  //Colors based on color pallet of d3 (Set 1)
+  color_healthy_inner = color(52,123,184); //D
+  color_healthy_outer = color(174, 202, 227); //D
+  color_ill_inner = color(224,30,31); //D
+  color_ill_outer = color(243, 165, 165); //D
+  color_vac_inner = color(76,172,76); //D
+  color_vac_outer = color(183, 222, 183); //D
 
   v1 = createVector(1,4);
   let canvas = createCanvas(660, 400);
