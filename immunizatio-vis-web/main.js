@@ -24,6 +24,7 @@ let maxHeight = () => sketchHeight - innerRadius;
 let spreadValueInput = 5;
 let deadValueInput = 5;
 let currentVacValue = 1;
+let simulatedWithHighVacRate = false;
 
 let axisAbsolute = false;
 let simulationCounter = 0;
@@ -690,6 +691,21 @@ document.getElementById("vac-input").oninput = () =>{
   syncVac();
 }
 
+document.getElementById("simStepInput").onchange = () =>{
+  let inputVal = document.getElementById("simStepInput").value;
+  if(inputVal == 0){
+    daysToSimulate = 365;
+    document.getElementById("simStepInput").value = 365;
+  }else{
+    daysToSimulate = parseInt(inputVal);
+  }
+}
+
+document.getElementById("axisToggleInput").onclick = () => {
+  let checkVal = document.getElementById("axisToggleInput").checked;
+  axisAbsolute = !checkVal;
+}
+
 function addSimulationHtml(){
   d3.select("#chart-list").insert('div', ":first-child")
     .attr('class','sim-container')
@@ -716,6 +732,12 @@ function startSimulation(){
   document.getElementById("spread-input").disabled = true;
   document.getElementById("dead-input").disabled = true;
   document.getElementById("vac-input").disabled = true;
+  document.getElementById("simStepInput").disabled = true;
+  document.getElementById("axisToggleInput").disabled = true;
+
+  if(currentVacValue >= 5){
+    simulatedWithHighVacRate = true;
+  }
 }
 
 function resetSimulation(){
@@ -723,12 +745,18 @@ function resetSimulation(){
   document.getElementById("spread-input").disabled = false;
   document.getElementById("dead-input").disabled = false;
   document.getElementById("vac-input").disabled = false;
+  document.getElementById("simStepInput").disabled = false;
+  document.getElementById("axisToggleInput").disabled = false;
   simulationData = [];
   daysAlreadySimulated = 0;
+
+  if(simulatedWithHighVacRate == false && simulationCounter >= 1){
+    d3.select('#tipp').style('display', 'block');
+  }else{
+    d3.select('#tipp').style('display', 'none');
+  }
 }
 
 drawGraph("#chartReal");
-drawGraphFromData("#chart1", testArray);
-drawGraphFromData("#chart1", testArray);
 setUpCircles();
 syncVac();

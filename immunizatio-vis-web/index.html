@@ -9,7 +9,7 @@
   <body>
     <div id="app">
       <div id="heading-section">
-        <h1>Immunization Visualization</h1>
+        <h1>Vaccination Visualization</h1>
         <h2>by Lukas Liß</h2>
       </div>
       <div id="simulation-section">
@@ -33,14 +33,42 @@
         <div id="simulation-canvas">
 
         </div>
+        <div id="subSimulation">
+          <div id="legend">
+            <div class="row" style="margin-top: 16px;">
+              <div class="color-box" style="background-color: #0a37ff;"></div>
+              <p class="smallMargin">= Healty Unvaccinated</p>
+            </div>
+            <div class="row">
+              <div class="color-box" style="background-color: #ff120a;"></div>
+              <p class="smallMargin">= Infected</p>
+            </div>
+            <div class="row">
+              <div class="color-box" style="background-color: #27ff0a;"></div>
+              <p class="smallMargin">= Vaccinated</p>
+            </div>
+          </div>
+          <div id="subSetting">
+            <div class="adv-settings">
+              <p>Number of Simulation Steps: </p>
+              <input type="number" id="simStepInput" name="quantity" min="1" max="1000" value="365">
+            </div>
+            <div class="adv-settings">
+              <p>Scale Chart Axis dynamically:</p>
+              <label class="switch">
+                <input type="checkbox" id="axisToggleInput" checked="true">
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="chart-section">
         <div id="chart-description-section">
-          <p>
-            Here are the charts presented. The color sheme is also given here.
-          </p>
         </div>
         <h3>Simulated Data:</h3>
+        <p>No data yet. Start a simulation to genereate data!</p>
+        <p id="tipp">Tipp: Try to set the Vaccination Rate higher then 50% to see how that effects the results.</p>
         <div id="chart-list">
           <div id="chart1">
 
