@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Visualization Vaccination</title>
   </head>
   <body>
     <div id="app">
       <div id="heading-section">
         <h1>Vaccination Visualization</h1>
-        <h2>by Lukas Liß</h2>
+        <div id="start-text">
+          <h2>Simulate the spread of a disease</h2>
+          <p style="text-align: left;">The goal of this visualization is to show the effect of vaccination on the spread of a disease. Therefore one can simulate the spread with various parameters. But of course, this simulation does not reflect reality. A list with some of the major simplifications can be found <a href="https://github.com/LukasLiss/immunization-visualization/blob/main/SIMPLIFICATIONS.md">here</a>.</p>
+        </div>
       </div>
       <div id="simulation-section">
         <div id="simulation-settings">
@@ -83,8 +86,6 @@
       </div>
     </div>
     <script src="/p5.js"></script>
-    <script src="/p5bridge.js"></script>
-    <!--<script type="module" src="/sketch.js"></script>-->
     <script type="module" src="/main.js"></script>
   </body>
 </html>

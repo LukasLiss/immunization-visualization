@@ -4,6 +4,10 @@
   --textColor: #2c3e50;
 }
 
+h1 {
+  text-decoration: underline;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -172,4 +176,17 @@ input:checked + .slider:before {
 .color-box {
   width: 8px;
   height: 8px;
+}
+#heading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#start-text {
+  width: 660px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
